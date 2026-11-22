@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DomainPulse OSINT</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2e;--panel2:#18233b;--line:#293650;--text:#edf3ff;--muted:#9aabc8;--accent:#66e3c4;--blue:#7aa7ff;--warn:#ffd37a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#16294a 0,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+main{max-width:1150px;margin:auto;padding:28px 18px 50px}.top{display:flex;align-items:center;gap:14px;margin-bottom:26px}.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,var(--accent),var(--blue));display:grid;place-items:center;color:#071321;font-size:25px;font-weight:900}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}.top h1{margin:2px 0 0;font-size:clamp(25px,4vw,36px);letter-spacing:-.04em}.top p{margin:3px 0;color:var(--muted)}.pill{margin-left:auto;border:1px solid #286a61;color:var(--accent);border-radius:999px;padding:6px 10px;font-size:12px;white-space:nowrap}
+.card{background:linear-gradient(145deg,rgba(21,31,53,.97),rgba(16,24,42,.97));border:1px solid var(--line);border-radius:18px;padding:21px;margin-bottom:17px;box-shadow:0 12px 35px #0002}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.section-head h2{font-size:17px;margin:0}.muted{color:var(--muted)}.searchrow{display:flex;gap:10px}.searchrow input{flex:1;min-width:0;background:#0a1120;color:var(--text);border:1px solid #34435f;border-radius:11px;padding:14px 15px;font:inherit;outline:none}.searchrow input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #66e3c41c}button{border:0;border-radius:11px;padding:12px 16px;font:inherit;font-weight:750;cursor:pointer;transition:.15s}button:disabled{opacity:.55;cursor:wait}.primary{background:var(--accent);color:#061b1b}.secondary{background:#202d47;color:var(--text);border:1px solid #364663}.searchrow .primary{min-width:140px}.note{font-size:12px;color:var(--muted);margin:12px 0 0}.notice{display:none;background:#332918;border:1px solid #735a2a;color:#ffe4a8;padding:12px 14px;border-radius:12px;margin-bottom:16px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:17px 0}.stat{background:#10192c;border:1px solid var(--line);border-radius:14px;padding:15px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:25px;margin-top:4px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.result{min-height:90px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;color:#d6e1f5}.empty{color:#7183a3;font-style:italic}.tag{display:inline-block;font-size:11px;border:1px solid #34435f;color:var(--blue);border-radius:6px;padding:3px 7px;margin-left:7px}.status{font-size:12px;color:var(--muted)}.status.ok{color:var(--accent)}.status.err{color:#ffb2a6}.footer{text-align:center;color:#6f81a0;font-size:12px;margin-top:24px}a{color:var(--accent)}@media(max-width:700px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.searchrow{flex-direction:column}.searchrow .primary{width:100%}.pill{display:none}.card{padding:16px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div class="logo">⌁</div>
+    <div><div class="eyebrow">Passive reconnaissance</div><h1>DomainPulse <span style="color:var(--accent)">OSINT</span></h1><p>Public-source domain intelligence in one dashboard.</p></div>
+    <div class="pill">● Passive mode</div>
+  </header>
+
+  <section class="card">
+    <div class="section-head"><h2>Target domain</h2><span class="status" id="status">Ready</span></div>
+    <form id="scanForm">
+      <div class="searchrow"><input id="domain" placeholder="example.com" aria-label="Target domain" autocomplete="url" required><button class="primary" id="scanBtn" type="submit">Run lookup ↗</button></div>
+    </form>
+    <p class="note">Use only domains you own or are authorized to assess. This page makes passive requests to public data services; availability and results depend on those services.</p>
+  </section>
+  <div class="notice" id="notice"></div>
+  <div class="stats">
+    <div class="stat"><span>DNS records</span><strong id="dnsCount">—</strong></div>
+    <div class="stat"><span>Subdomains found</span><strong id="subCount">—</strong></div>
+    <div class="stat"><span>Archived URLs</span><strong id="urlCount">—</strong></div>
+    <div class="stat"><span>Lookups completed</span><strong id="doneCount">0/4</strong></div>
+  </div>
+  <div class="grid">
+    <section class="card"><div class="section-head"><h2>Domain registration <span class="tag">RDAP</span></h2><span class="status" id="rdapStatus">Not run</span></div><div class="result empty" id="rdap">Registration details will appear here.</div></section>
+    <section class="card"><div class="section-head"><h2>DNS records <span class="tag">DNS-over-HTTPS</span></h2><span class="status" id="dnsStatus">Not run</span></div><div class="result empty" id="dns">A, AAAA, MX, TXT, NS and CNAME records will appear here.</div></section>
+    <section class="card"><div class="section-head"><h2>Passive subdomains <span class="tag">crt.sh</span></h2><span class="status" id="subStatus">Not run</span></div><div class="result empty" id="subs">Certificate transparency results will appear here.</div></section>
+    <section class="card"><div class="section-head"><h2>Historical URLs <span class="tag">Wayback Machine</span></h2><span class="status" id="wayStatus">Not run</span></div><div class="result empty" id="wayback">Archived URL results will appear here.</div></section>
+  </div>
+  <section class="card">
+    <div class="section-head"><div><h2>Export report</h2><div class="muted" style="font-size:13px">Download the current results as a structured report.</div></div></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="secondary" id="jsonBtn" type="button">↓ Export JSON</button><button class="secondary" id="csvBtn" type="button">↓ Export CSV</button><button class="secondary" id="clearBtn" type="button">Clear results</button></div>
+  </section>
+  <div class="footer">DomainPulse OSINT · Educational and defensive use only · No port scanning or exploitation</div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let report = {tool:"DomainPulse OSINT",target:"",generatedAt:null,registration:null,dns:[],subdomains:[],historicalUrls:[],errors:[]};
+const types = ["A","AAAA","MX","TXT","NS","CNAME"];
+function setStatus(id,text,kind=""){const el=$(id);el.textContent=text;el.className="status "+kind}
+function show(id,text,empty=false){$(id).textContent=text;$(id).classList.toggle("empty",empty)}
+function validDomain(s){return /^(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/.test(s)}
+async function getJson(url){const r=await fetch(url,{headers:{"Accept":"application/json"}});if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
+function escapeDomain(d){return encodeURIComponent(d)}
+async function runLookup(e){
+ e.preventDefault(); const domain=$("domain").value.trim().toLowerCase().replace(/\.$/,"");
+ if(!validDomain(domain)){ $("notice").style.display="block";$("notice").textContent="Enter a valid domain such as example.com.";return}
+ $("notice").style.display="none";$("scanBtn").disabled=true;$("scanBtn").textContent="Looking up…";setStatus("status","Collecting public data…");
+ report={tool:"DomainPulse OSINT",target:domain,generatedAt:new Date().toISOString(),registration:null,dns:[],subdomains:[],historicalUrls:[],errors:[]};
+ ["rdap","dns","subs","wayback"].forEach(id=>show(id,"Loading…"));["rdapStatus","dnsStatus","subStatus","wayStatus"].forEach(id=>setStatus(id,"Loading…"));
+ let completed=0;
+ const task=async(name,fn)=>{try{await fn()}catch(err){report.errors.push({source:name,error:String(err.message||err)});setStatus(({registration:"rdapStatus",dns:"dnsStatus",subdomains:"subStatus",historical:"wayStatus"})[name],"Unavailable","err");}finally{completed++;$("doneCount").textContent=completed+"/4"}};
+ await Promise.all([
+ task("registration",async()=>{
+   const data=await getJson("https://rdap.org/domain/"+escapeDomain(domain));
+   const events=(data.events||[]).map(x=>`${x.eventAction}: ${x.eventDate||"unknown"}`);
+   const names=(data.nameservers||[]).map(x=>x.ldhName).filter(Boolean);
+   report.registration={domain:data.ldhName||domain,registrar:(data.entities||[]).flatMap(e=>[...(e.roles||[]).includes("registrar")?[e.vcardArray?.[1]?.find(v=>v[0]==="fn")?.[3]].filter(Boolean):[]])[0]||"Not provided",events,nameservers:names,status:data.status||[]};
+   show("rdap",[`Domain: ${report.registration.domain}`,`Registrar: ${report.registration.registrar}`,`Nameservers: ${names.join(", ")||"Not provided"}`, ...events].join("\n"));setStatus("rdapStatus","Complete","ok");
+ }),
+ task("dns",async()=>{
+   const all=[];for(const type of types){try{const d=await getJson(`https://dns.google/resolve?name=${escapeDomain(domain)}&type=${type}`);for(const a of (d.Answer||[]))all.push({type:a.typeName||type,name:a.name,data:a.data,TTL:a.TTL})}catch(err){report.errors.push({source:"DNS "+type,error:err.message})}}
+   report.dns=all;show("dns",all.length?all.map(x=>`${x.type.padEnd(5)} ${x.name}  ${x.data}`).join("\n"):"No records returned.");$("dnsCount").textContent=all.length;setStatus("dnsStatus","Complete","ok");
+ }),
+ task("subdomains",async()=>{
+   const d=await getJson(`https://crt.sh/?q=%25.${escapeDomain(domain)}&output=json`);
+   const names=new Set();for(const row of (Array.isArray(d)?d:[])){for(const n of (row.name_value||"").split(/\n/)){const clean=n.trim().toLowerCase().replace(/^\*\./,"");if(clean===domain||clean.endsWith("."+domain))names.add(clean)}}
+   report.subdomains=[...names].sort();show("subs",report.subdomains.length?report.subdomains.join("\n"):"No subdomains returned.");$("subCount").textContent=report.subdomains.length;setStatus("subStatus","Complete","ok");
+ }),
+ task("historical",async()=>{
+   const url=`https://web.archive.org/cdx/search/cdx?url=${escapeDomain(domain)}/*&output=json&fl=original&collapse=urlkey&filter=statuscode:200&limit=100`;
+   const d=await getJson(url);const urls=Array.isArray(d)?d.slice(1).map(row=>row[0]).filter(Boolean):[];
+   report.historicalUrls=[...new Set(urls)];show("wayback",report.historicalUrls.length?report.historicalUrls.join("\n"):"No archived URLs returned.");$("urlCount").textContent=report.historicalUrls.length;setStatus("wayStatus","Complete","ok");
+ })
+ ]);
+ $("doneCount").textContent="4/4";setStatus("status",`Finished: ${domain}`,"ok");$("scanBtn").disabled=false;$("scanBtn").textContent="Run lookup ↗";
+ if(report.errors.length){$("notice").style.display="block";$("notice").textContent="Some public services could not be reached. Check the section statuses; browser CORS rules or service rate limits may prevent results."}
+}
+function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)}
+$("scanForm").addEventListener("submit",runLookup);
+$("jsonBtn").addEventListener("click",()=>download("domainpulse-report.json",JSON.stringify(report,null,2),"application/json"));
+$("csvBtn").addEventListener("click",()=>{
+ const rows=[["section","type","name","value"]];
+ (report.dns||[]).forEach(x=>rows.push(["dns",x.type,x.name,x.data]));
+ (report.subdomains||[]).forEach(x=>rows.push(["subdomain","","",x]));
+ (report.historicalUrls||[]).forEach(x=>rows.push(["historical_url","","",x]));
+ if(report.registration) {rows.push(["registration","domain","",report.registration.domain||""]);rows.push(["registration","registrar","",report.registration.registrar||""]);(report.registration.nameservers||[]).forEach(x=>rows.push(["registration","nameserver","",x]));}
+ const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");download("domainpulse-report.csv",csv,"text/csv;charset=utf-8");
+});
+$("clearBtn").addEventListener("click",()=>{report={tool:"DomainPulse OSINT",target:"",generatedAt:null,registration:null,dns:[],subdomains:[],historicalUrls:[],errors:[]};["rdap","dns","subs","wayback"].forEach(id=>show(id,"Results will appear here.",true));["rdapStatus","dnsStatus","subStatus","wayStatus"].forEach(id=>setStatus(id,"Not run"));["dnsCount","subCount","urlCount"].forEach(id=>$(id).textContent="—");$("doneCount").textContent="0/4";setStatus("status","Ready");$("notice").style.display="none"});
+</script>
+</body>
+</html>
